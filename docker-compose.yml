@@ -30,6 +30,7 @@ services:
             - LETSENCRYPT=true
             - LE_EMAIL=name@example.com
             - LE_FQDN=www.example.com
+            #- LE_ADDITIONAL_OPTIONS="--preferred-chain 'ISRG Root X1'"
             #- SSL_CERT=le-crt.pem
             #- SSL_KEY=le-key.pem
             #- SSL_CHAIN_CERT=le-chain-crt.pem

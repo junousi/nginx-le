@@ -34,7 +34,11 @@ if [ -f ${LE_SSL_CERT} ] && openssl x509 -checkend ${renew_before} -noout -in ${
 fi
 
 echo "letsencrypt certificate will expire soon or missing, renewing..."
-certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
+if [[ ! -z "${LE_ADDITIONAL_OPTIONS}" ]]; then
+    eval certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html "${LE_ADDITIONAL_OPTIONS}" -d ${LE_FQDN}
+else
+    certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
+fi
 le_result=$?
 if [ ${le_result} -ne 0 ]; then
     echo "failed to run certbot"
