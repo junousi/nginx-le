@@ -33,8 +33,29 @@ if [ -f ${LE_SSL_CERT} ] && openssl x509 -checkend ${renew_before} -noout -in ${
     fi
 fi
 
+# process additional letsencrypt --options which may include 'quoted options'
+set --
+STR_BUILD=false
+tempstring=""
+for element in $LE_ADDITIONAL_OPTIONS; do
+    if $STR_BUILD && echo "${element}" | grep -q -v "'"; then
+        tempstring="${tempstring} ${element}"
+    elif $STR_BUILD && echo "${element}" | grep -q "'"; then
+        tempstring="${tempstring} ${element}"
+        tempstring=$(echo ${tempstring} | tr -d "'")
+        set -- "$@" "${tempstring}"
+        STR_BUILD=false
+        tempstring=""
+    elif echo "${element}" | grep -q "'"; then
+        tempstring="${element}"
+        STR_BUILD=true
+    else
+        set -- "$@" "${element}"
+    fi
+done
+
 echo "letsencrypt certificate will expire soon or missing, renewing..."
-certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
+certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html "${@}" -d ${LE_FQDN}
 le_result=$?
 if [ ${le_result} -ne 0 ]; then
     echo "failed to run certbot"
